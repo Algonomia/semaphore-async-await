@@ -186,4 +186,20 @@ describe('Semaphore', () => {
 
     expect(global).toEqual(4);
   });
+
+  it('should update the number of max permits', async () => {
+    let global = 0;
+    const sem = new Semaphore(2);
+
+    const f = async () => {
+      await sem.acquire();
+      await wait(500);
+      global += 1;
+    };
+
+    f(); f(); f(); await wait(1500);
+    expect(global).toEqual(2);
+    sem.updateMaxPermits(3); await wait(1000);
+    expect(global).toEqual(3);
+  });
 });

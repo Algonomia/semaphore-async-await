@@ -31,6 +31,28 @@ export default class Semaphore {
   }
 
   /**
+   * Update the number of maximal permits
+   * @param maxPermit  The number of permits, i.e. things being allowed to run in parallel.
+   */
+  public updateMaxPermits(maxPermit: number) {
+    if (maxPermit === this.maxPermits) {
+      return;
+    }
+
+    this.permits += maxPermit - this.maxPermits;
+    this.maxPermits = maxPermit;
+
+    // Empty promiseResolverQueue to the number of permits
+    while (this.permits > 0 && this.promiseResolverQueue.length > 0) {
+        this.permits -= 1;
+        const nextResolver = this.promiseResolverQueue.shift();
+        if (nextResolver) {
+            nextResolver(true);
+        }
+    }
+  }
+
+  /**
    * Returns the number of available permits.
    * @returns  The number of available permits.
    */
